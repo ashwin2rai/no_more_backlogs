@@ -1,7 +1,10 @@
 from pathlib import Path  # pathlib is seriously awesome!
 
-data_dir = Path('/path/to/some/logical/parent/dir')
-data_path = data_dir / 'my_file.csv'  # use feather files if possible!!!
+data_dir_var = Path.cwd().parent.parent/'data'
 
-customer_db_url = 'sql:///customer/db/url'
-purchases_db_url = 'sql:///purchases/db/url'
+reddit_auth = Path.cwd().parent.parent/'data'/'RedditAuth' 
+#You can use create_reddit_OAuth in the utils to create the OAuth File
+
+
+
+
