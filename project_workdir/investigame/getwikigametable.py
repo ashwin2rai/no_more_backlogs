@@ -1,5 +1,5 @@
-from utils import get_web_content
-from utils import create_datadir_link
+from .utils import get_web_content
+
 import pandas as pd
 
 class GetWikiGameTable:

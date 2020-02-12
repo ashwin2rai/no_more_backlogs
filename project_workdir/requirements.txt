@@ -1,0 +1,5 @@
+# Needed package/versions
+matplotlib
+numpy==1.15.4
+pycodestyle>=2.4.0
+pandas<=0.22.0

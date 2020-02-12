@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+from .config import reddit_auth
+from .utils import create_datadir_link
+
 import pandas as pd
 import numpy as np
-from config import reddit_auth
-from utils import create_datadir_link
-
 import re
 import pickle
 import praw

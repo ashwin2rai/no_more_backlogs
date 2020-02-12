@@ -1,4 +1,4 @@
-from config import data_dir_var 
+from .config import data_dir_var 
 
 def create_datadir_link(data_path = data_dir_var,
                         filename = 'text.csv'):
@@ -53,6 +53,7 @@ def get_web_content(addr, ret = 'html'):
     
 def create_reddit_OAuth(client_id, api_key, username, password, 
                         user_agent_key, filename = 'RedditAuth.sav'):
+    import pickle
     reddit_auth = {}
     reddit_auth = {'client_id': client_id,
                'API_key': api_key,

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from utils import get_web_content
-from utils import create_datadir_link
+from .utils import get_web_content
+from .utils import create_datadir_link
+
 import pandas as pd
 import numpy as np
 import pickle
@@ -536,14 +537,3 @@ class PricingAndRevs:
         self.game_df['Success'] = np.where(self.game_df[col] > threshold, 0,1)
         if verbose:
             print(self.game_df['Success'][self.game_df[col].notna()].value_counts())
-
-    def write_fullcsv(self, data_path=None, fname = 'ps4_list_wo_comments.csv'):
-        if not data_path:
-            fpath = create_datadir_link(filename = fname)
-        else:
-            fpath = create_datadir_link(data_path = data_path, filename = fname)
-        try:
-            self.game_df.to_csv(fpath)
-        except:
-            print('Could not save file, check if dataframe was created properly or path is right.')
-
