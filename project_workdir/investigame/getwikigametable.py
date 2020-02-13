@@ -1,4 +1,5 @@
 from .utils import get_web_content
+from .utils import create_datadir_link
 
 import pandas as pd
 
@@ -11,8 +12,7 @@ class GetWikiGameTable:
         self.html_add_0_m = 'https://en.wikipedia.org/wiki/List_of_PlayStation_4_games'
         self.xpath_m_z = '/html/body/div[3]/div[3]/div[4]/div/table/tbody/tr[{}]//text()'
         self.html_add_m_z = 'https://en.wikipedia.org/wiki/List_of_PlayStation_4_games_(M-Z)'
-    
-    
+        
     def get_wiki_table_list(self, addr, xpath, counter = 3):
         """
         Returns a list of list containing the first 7 values from each row of a Wikitable
@@ -118,9 +118,7 @@ class GetWikiGameTable:
         
         return cleaned_html_text[0:7]
     
-    def get_wiki_table_df(self, full_list = None,
-                         columns=['Titles','Genres','Developers','Publishers','ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA'],
-                         release_list = ['ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']):
+    def get_wiki_table_df(self, full_list = None, columns=None,release_list = None):
         """
         Returns a dataframe from a given list of lists, given 7 column data. 
         The last three columns are converted to datetime format.
@@ -150,6 +148,10 @@ class GetWikiGameTable:
         
         if not full_list:
             full_list = self.assembled_list
+        if not columns:
+            columns=['Titles','Genres','Developers','Publishers','ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
+        if not release_list:
+            release_list = ['ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
         
         try:
             ps4_game_list = pd.DataFrame(full_list, columns = columns)

@@ -9,8 +9,7 @@ import pickle
 import praw
 from psaw import PushshiftAPI
 
-class GetRedditComments:
-    
+class GetRedditComments:    
     def __init__(self, game_list, comment_window = 30):
         self.game_df = game_list
         self.game_df['CommentWindow'] = (self.game_df['ReleaseDate_Agg'] -  pd.to_timedelta(comment_window, unit='d'))
@@ -24,8 +23,7 @@ class GetRedditComments:
                     client_secret = reddit_auth_dict['API_key'],
                     password = reddit_auth_dict['password'],
                     username = reddit_auth_dict['username'],
-                    user_agent=reddit_auth_dict['user_agent'])
-        
+                    user_agent = reddit_auth_dict['user_agent'])        
         del reddit_auth_dict
         self.reddit_inst = reddit
     
@@ -33,8 +31,11 @@ class GetRedditComments:
         return PushshiftAPI(reddit)
 
     def get_reddit_comments(self, max_response_cache = 500,
-                            subreddit_list = ['gaming','ps4','Games','gamernews','gamedev','rpg','DnD'],
+                            subreddit_list = None,
                            verbose = True):
+        
+        if not subreddit_list:
+            subreddit_list = ['gaming','ps4','Games','gamernews','gamedev','rpg','DnD']
         
         df = self.game_df
         psaw_api = self._create_psaw_instance(self.reddit_inst)

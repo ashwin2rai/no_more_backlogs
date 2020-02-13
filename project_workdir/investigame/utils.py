@@ -1,4 +1,5 @@
 from .config import data_dir_var 
+from .config import sql_db
 
 def create_datadir_link(data_path = data_dir_var,
                         filename = 'text.csv'):
@@ -74,3 +75,49 @@ def write_tocsv(df, data_path=None, fname = 'file.csv'):
         df.to_csv(fpath)
     except:
         print('Could not save file, check if dataframe was created properly or path is right.')
+
+def create_postgres_authdict(user, password, hostandport, dbname ='', dir_path = sql_db, fname = 'SQLAuth.sql',save=True):
+    import pickle
+    
+    sqldb_dict = {}
+    sqldb_dict['username'] = user
+    sqldb_dict['password'] = password
+    sqldb_dict['host:port'] = hostandport
+    sqldb_dict['dbname'] = dbname
+    
+    if save:
+        pickle.dump(sqldb_dict,open(create_datadir_link(data_path = dir_path, filename=fname),'wb'))
+    else:
+        return create_posgresurl(sqldb_dict = sqldb_dict)
+
+def create_posgresurl(dir_path = sql_db, fname = 'SQLAuth.sql', sqldb_dict=None):
+    import pickle
+    
+    if not sqldb_dict:
+        sqldb_dict = pickle.load(open(create_datadir_link(data_path = dir_path, filename=fname),'rb'))
+    return 'postgres://{}:{}@{}/{}'.format(sqldb_dict['username'],sqldb_dict['password'],sqldb_dict['host:port'],sqldb_dict['dbname'])
+
+def sql_readaspd(db_dets, query):
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import NullPool    
+    import pandas as pd
+    
+    engine = create_engine(db_dets,poolclass=NullPool)
+    con_var = engine.connect()
+    rs_var = con_var.execute(query)
+    con_var.close
+    df = pd.DataFrame(rs_var.fetchall())
+    df.columns = rs_var.keys()
+    
+    return df
+
+def sql_pd_write(df, db_dets, table_name):
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import NullPool    
+    import pandas as pd
+    
+    engine = create_engine(db_dets, poolclass=NullPool)
+    con_var = engine.connect()
+    df.to_sql(table_name, con=engine)
+    con_var.close
+    return None
