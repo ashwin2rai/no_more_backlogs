@@ -58,7 +58,7 @@ class AutoClassifier:
             try:
                 pre_proc_dict = pickle.load(open(create_dir_link(filename = load_preproc), 'rb'))
             except:
-                print('Error: Could not load preprocess file. Check filename and/or directory')
+                raise IOError('ERROR: Could not load preprocess file. Check filename and/or directory')
             max_tfidf_features = pre_proc_dict['max_tfidf_features']
             ngram_range = pre_proc_dict['ngram_range']
             cat_var_limit = pre_proc_dict['cat_var_limit']
@@ -128,8 +128,8 @@ class AutoClassifier:
                 df = pd.concat([pd.concat([df.iloc[:,:-1],temp_df],sort=False,axis=1),df.iloc[:,-1]],sort=False,axis=1)
                 #Transforms a category variable column using OneHotEncoding
                 
-        assert (df.notnull().all().all()), 'Error: NaNs present in DataFrame, please clean data'
-        assert df.select_dtypes(include=['object']).empty, 'Error: Some columns could not be converted to category valuables and encoded. Please segment non-numerical data columns (that is not the text column) or increase cat_var_limit'
+        assert (df.notnull().all().all()), 'ERROR: NaNs present in DataFrame, please clean data.'
+        assert df.select_dtypes(include=['object']).empty, 'ERROR: Some columns could not be converted to category valuables and encoded. Please segment non-numerical data columns (that is not the text column) or increase cat_var_limit'
         
         return df
 
@@ -149,7 +149,7 @@ class AutoClassifier:
             try:
                 df_all[text_col] = self._clean_text(df_all[text_col])
             except:
-                print('Cannot clean text, recheck text column')
+                print('WARNING: Cannot clean text, recheck text column')
                 
         if preproc is None:
             pre_proc_dict['TfidVect'] = TfidfVectorizer(max_features=max_tfidf_features,
@@ -270,9 +270,7 @@ class AutoClassifier:
                 select_feats = df.columns[:-1][np.abs(lasso_coeffs) > 0].values
                 pre_proc_dict['feat_columns'] = select_feats
             except:
-                print('Lasso Coefficients all turned out to be 0')
-                print(' or could not be calculated. Check your')
-                print(' dataset or switch off feature selection.')
+                print('WARNING: Lasso Coefficients all turned out to be 0 or could not be calculated. Check your dataset or switch off feature selection.')
                          
             x_train = x_train.loc[:,select_feats]
             x_test = x_test.loc[:,select_feats]
@@ -467,7 +465,7 @@ class AutoClassifier:
         self.model = model
 
 
-    def load_model(self, type='shallow', filename='Trained_shallow_models.sav', 
+    def load_model(self, type_model='shallow', filename='Trained_shallow_models.sav', 
                    clf='logreg'):
         """
         This function is used to load a previously saved trained model. 
@@ -485,13 +483,12 @@ class AutoClassifier:
         'gradbooststep': Gradient Boosted Classification Trees
         ---------------------------------------------------------------------
         """
-        assert (type == 'shallow' or type == 'deep'), 'Wrong input for type' 
-        if type == 'shallow':
-            import pickle
+        assert (type_model in ['shallow','deep']), "ERROR: Wrong label for argument 'type'." 
+        if type_model == 'shallow':
             try:
                 model_dict = pickle.load(open(create_dir_link(filename = filename), 'rb'))
             except:
-                print('Could not load file. Check filename.')
+                raise IOError('ERROR: Could not load file. Check filename.')
             for label, model in model_dict.items():
                 print(label + ' score is: ' + str(model[1]))
                 print('Selecting model: '+ str(clf))
@@ -499,12 +496,12 @@ class AutoClassifier:
             self.model = model_dict[clf][0]
             return self
         
-        elif type == 'deep':
+        elif type_model == 'deep':
             from keras.models import load_model 
             try:
                 model = load_model(create_dir_link(filename = filename))
             except:
-                print('Could not load file. Check filename.')
+                raise IOError('ERROR: Could not load file. Check filename.')
             print('Model Summary: ')
             model.summary()
             self.model = model
@@ -515,34 +512,34 @@ class AutoClassifier:
             try:
                 return self.model.predict(val_mat)
             except:
-                print('Error: check if model is loaded.')
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
         else:
             try:
                 return self.model_dict[clf][0].predict(val_mat)
             except:
-                print('Error: check if model is loaded.')
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
             
     def predict_proba(self, val_mat, clf = None):
         if not clf:
             try:
                 return self.model.predict_proba(val_mat)
             except:
-                print('Error: check if model is loaded.')
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
         else:
             try:
                 return self.model_dict[clf][0].predict_proba(val_mat)
             except:
-                print('Error: check if model is loaded.')
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
 
     def score(self, x_test, y_test, clf = None):
         if not clf:
             try:
                 return self.model.score(x_test, y_test)
             except:
-                print('Error: check if model is loaded.')
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
         else:
             try:
                 return self.model_dict[clf][0].score(x_test, y_test)
             except:
-                print('Error: check if model is loaded.')        
+                raise ValueError('ERROR: Could not predict. Check if model is loaded.')
         

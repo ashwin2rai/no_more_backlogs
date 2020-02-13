@@ -169,12 +169,14 @@ class PricingAndRevs:
         try:
             return float(tree.xpath(xpath_adr)[0])
         except:
+            print('WARNING: Could not scrape review value, check review xpath address')
             return np.nan
     
     def _get_pic_link(self, tree, xpath_adr = '/html/body/div[1]/div[2]/div[3]/div[1]/div[1]/div/div/img/@data-src'):
         try:
             return tree.xpath(xpath_adr)[0]
         except:
+            print('WARNING: Could not scrape game card web address, check review xpath address')
             return np.nan 
         
     def _get_reg_output(self, soup, reg_string):
@@ -227,7 +229,7 @@ class PricingAndRevs:
         This function is specifically used to extract the price and date from the pricing history HTML script tag text.
         """
         reg_find = re.findall(reg_str,content)
-        assert reg_find is not None, "Could not extract any content, check regex string"
+        assert reg_find is not None, "ERROR: Could not extract any content, check regex string"
         return reg_find
 
   
@@ -261,7 +263,7 @@ class PricingAndRevs:
             try:
                 script_text = script_tag[counter].text
             except:
-                print('Could not find script with the price history, check web address.')
+                print('WARNING: Could not find the script section with price history, check web address and/or scraping mechanism.')
                 
             if 'Price, USD' in script_text:
                 find = True
@@ -291,15 +293,15 @@ class PricingAndRevs:
         try:
             price_history = pd.DataFrame(reg_output, columns = ['Date','Price'])
         except:
-            print('Could not convert scraped price history to dataframe. Check regex function.')
+            raise TypeError('Error: Could not convert scraped price history table to dataframe. Check regex function and scraping mechanism.')
         try:
             price_history['Date'] = pd.to_datetime(price_history['Date'],infer_datetime_format=True,errors='coerce')
         except:
-            print('Could not convert scraped price history dates into datetime format')
+            print('WARNING: Could not convert scraped price history dates into datetime format. Check scraping mechanism.')
         try:
             price_history['Price'] = pd.to_numeric(price_history['Price'],errors='coerce')
         except:
-            print('Could not convert scraped prices into float format.')
+            raise TypeError('ERROR: Could not convert scraped prices into float format. Check scraping mechanism and regex.')
         
         price_history['NormLogPrice'] = self._convert_normlogprice(price_history['Price'])
         price_history['Days'] = self._convert_date_to_cumdays(price_history['Date'])
@@ -318,7 +320,10 @@ class PricingAndRevs:
         Pandas.Series
         
         """
-        return np.log(series.div(series[0]))
+        try:
+            return np.log(series.div(series[0]))
+        except:
+            raise TypeError('ERROR: Could not transform prices to log function. Check price history data.')
     
     def _convert_date_to_cumdays(self, series):
         """
@@ -337,7 +342,10 @@ class PricingAndRevs:
         newseries = series.copy()
         newseries[0] = 0
         newseries.iloc[1:] = series.diff().iloc[1:].cumsum().dt.days
-        return newseries.astype(float)
+        try:
+            return newseries.astype(float)
+        except:
+            raise TypeError('ERROR: Could not transform dates to days. Check price history data.')
     
     def _get_price_history_link(self, tree, game_name,
                                search_hits  = '/html/body/div[1]/div[2]/div/div/a/span/span/text()',
@@ -387,49 +395,49 @@ class PricingAndRevs:
             try:
                 return addon + game_link_dict[game_name]
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' standard edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' standard edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' gold edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' gold edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' deluxe edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' deluxe edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' ps4' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' ps4']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' playstation 4 edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' playstation 4 edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None      
         elif game_name+' enhanced edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' enhanced edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         elif game_name+' game of the year edition' in game_link_dict.keys():
             try:
                 return addon + game_link_dict[game_name+' game of the year edition']
             except:
-                print(f"Did not find {game_name} in search results. Returning None")
+                print(f"WARNING: Did not find {game_name} in search results. Returning None")
                 return None
         else:
             return None  
@@ -442,7 +450,7 @@ class PricingAndRevs:
         try:
             pickle.dump(self.game_price_dict, open(str(fpath), 'wb'))
         except:
-            print('Could not save file, check if dataframe was created or path is right.')
+            print('WARNING: Could not save file, check if dataframe was created or path is right.')
 
     def get_prepdf_withreg(self, days = None, 
                            publisher_medval = 18, publisher_lowval = 3,
@@ -518,7 +526,7 @@ class PricingAndRevs:
         try:
             assert df['MappedGenres'].notna().all()
         except:
-            print("WARNING: The Genre CSV needs to be updated. The following Genres need to be mapped:")
+            print("WARNING: The Genre CSV needs to be updated. The following Genres need to be mapped: ")
             print([*df['Genres'][df['MappedGenres'].isna()].values])
             
             

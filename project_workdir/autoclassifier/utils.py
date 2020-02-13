@@ -15,5 +15,5 @@ def write_tocsv(df, data_path=None, fname = 'file.csv'):
     try:
         df.to_csv(fpath)
     except:
-        print('Could not save file, check if dataframe was created properly or path is right.')
+        print('WARNING: Could not save file, check if dataframe was created properly or path is right.')
 

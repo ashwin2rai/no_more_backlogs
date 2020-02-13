@@ -1,5 +1,4 @@
 from .utils import get_web_content
-from .utils import create_datadir_link
 
 import pandas as pd
 
@@ -82,7 +81,7 @@ class GetWikiGameTable:
         try:
             return tree.xpath(xpath.format(counter))
         except:
-            print('Error: Cannot extract table rows, check Xpath path and/or row index where content starts (int(counter))')
+            raise ValueError('ERROR: Cannot extract table rows, check Xpath path and/or row index where content starts (int(counter))')
         
 
     def _get_cleaned_row(self, html_text):
@@ -156,14 +155,13 @@ class GetWikiGameTable:
         try:
             ps4_game_list = pd.DataFrame(full_list, columns = columns)
         except:
-            print('Error: issues with converting scraped wiki table data into DataFrame.')
-            return None
+            raise ValueError('ERROR: issues with converting scraped wiki table data into DataFrame.')
     
         for col in release_list:
             try:
                 ps4_game_list[col]=pd.to_datetime(ps4_game_list[col],infer_datetime_format=True,errors='coerce')
             except:
-                print('Could not convert scraped release date columns into datetime format.')
+                print('WARNING: Could not convert scraped release date columns into datetime format.')
     
         punc_dict={ord('\''):None, ord(':'):None, ord('#'):None, ord('/'):' ', 
                ord('&'):None, ord(';'):' ', ord('!'):None, ord(','):None, ord('?'):None, ord('.'):None}        

@@ -18,7 +18,10 @@ class GetRedditComments:
 
     def create_reddit_instance(self, reddit_auth_dict = None):
         if reddit_auth_dict is None:
-            reddit_auth_dict = pickle.load(open(create_datadir_link(reddit_auth,''),'rb'))
+            try:
+                reddit_auth_dict = pickle.load(open(create_datadir_link(reddit_auth,''),'rb'))
+            except:
+                raise IOError('ERROR: Could not load Reddit authentication file. Please check filename or path.')
         reddit = praw.Reddit(client_id = reddit_auth_dict['client_id'],
                     client_secret = reddit_auth_dict['API_key'],
                     password = reddit_auth_dict['password'],
