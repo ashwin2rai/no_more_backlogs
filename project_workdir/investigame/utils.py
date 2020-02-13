@@ -51,7 +51,19 @@ def get_web_content(addr, ret = 'html'):
     else:
         print('Error: ret tag is invalid in get_web_content')
         return None
-    
+
+def complete_gamedb(Complete_game_db, succes_prob):
+    import pandas as pd
+    import numpy as np
+    pred_prob = np.where(succes_prob[:,0]>succes_prob[:,1],succes_prob[:,0],succes_prob[:,1])
+    predictions = np.where(succes_prob[:,0]>succes_prob[:,1],0,1)
+    Complete_game_db['SuccessPredict'] = np.nan
+    Complete_game_db['SuccessPredict'] = pd.DataFrame(predictions,index=Complete_game_db.index,columns=['SuccessPredict'])
+    Complete_game_db['SuccessPredictProb'] = np.nan
+    Complete_game_db['SuccessPredictProb'] = pd.DataFrame(pred_prob,index=Complete_game_db.index,columns=['SuccessPredictProb'])
+    Complete_game_db['SuccessPredictText'] = Complete_game_db['SuccessPredict'].map({0:'Failure',1:'Success'})
+ 
+
 def create_reddit_OAuth(client_id, api_key, username, password, 
                         user_agent_key, filename = 'RedditAuth.sav'):
     import pickle
