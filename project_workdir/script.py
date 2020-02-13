@@ -7,12 +7,9 @@ from investigame import create_posgresurl
 from investigame import create_postgres_authdict
 from investigame import sql_pd_write
 from investigame import complete_gamedb
+from investigame import create_datadir_link
 
 from autoclassifier import AutoClassifier
-
-import numpy as np
-import pandas as pd
-
 
 WikiTable = GetWikiGameTable()
 WikiTable.get_wiki_table_list(WikiTable.html_add_0_m, WikiTable.xpath_0_m).get_wiki_table_list(WikiTable.html_add_m_z, WikiTable.xpath_m_z).get_wiki_table_df()
@@ -35,17 +32,20 @@ game_pred = AutoClassifier(game_dets_withcomments.game_df[['Reviews', 'InitPrice
 game_pred.preprocess_block()
 game_pred.shallow_model_fit()
 
-game_success = AutoClassifier(game_dets_withcomments.game_df[['Reviews', 'InitPrice',
+#game_df = pd.read_csv(create_datadir_link(filename='game_list_withtext'), index_col = 0)
+game_df = game_dets_withcomments.game_df
+
+game_success = AutoClassifier(game_df[['Reviews', 'InitPrice',
        'MappedGenres', 'MappedPublishers', 'MappedDevelopers',
                     'Release_Year', 'Release_Month', 'Release_Day',
        'Game_comments','Success']])
 feature_set = game_success.preprocess_block(load_preproc = 'preproc.sav')
 succes_prob = game_success.load_model(clf = 'gradbooststep').predict_proba(feature_set)
 
-complete_gamedb(game_dets_withcomments.game_df, succes_prob)
-write_tocsv(game_dets_withcomments.game_df, fname = 'game_list_withpreds')
-#create_postgres_authdict(user, password, hostandport, dbname ='')
-sql_pd_write(Complete_game_db, create_posgresurl(), 'investigame')
+complete_gamedb(game_df, succes_prob)
+write_tocsv(game_df, fname = 'game_list_withpreds')
+#create_postgres_authdict(user='username', password='3124hash', hostandport='51.22.22.22:5432', dbname ='gamedb')
+#sql_pd_write(game_df, create_posgresurl(), 'investigame')
 
 
 
