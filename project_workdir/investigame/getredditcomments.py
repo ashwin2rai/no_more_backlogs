@@ -24,8 +24,8 @@ class GetRedditComments:
                     password = reddit_auth_dict['password'],
                     username = reddit_auth_dict['username'],
                     user_agent = reddit_auth_dict['user_agent'])        
-        del reddit_auth_dict
         self.reddit_inst = reddit
+        return self
     
     def _create_psaw_instance(self, reddit):
         return PushshiftAPI(reddit)
@@ -33,14 +33,17 @@ class GetRedditComments:
     def get_reddit_comments(self, max_response_cache = 500,
                             subreddit_list = None,
                            verbose = True):
-        
+
         if not subreddit_list:
             subreddit_list = ['gaming','ps4','Games','gamernews','gamedev','rpg','DnD']
         
         df = self.game_df
+        
         psaw_api = self._create_psaw_instance(self.reddit_inst)
         
+        df = df[df['Reviews'].notna()].dropna().reset_index().drop(['index'],axis=1)
         df['Game_comments'] = np.nan
+        
         for row_tuple in df.itertuples():
             cache = []
             for subreddit in subreddit_list:
@@ -49,8 +52,8 @@ class GetRedditComments:
                     break
             
                 comment_list = psaw_api.search_comments(q=row_tuple.TitlesHTML, subreddit=subreddit)
-                                               #before=row_tuple.ReleaseDate_Agg.strftime('%Y-%d-%m'),
-                                               #after = row_tuple.CommentWindow.strftime('%Y-%d-%m') 
+                                               #,before=row_tuple.ReleaseDate_Agg.strftime('%Y-%d-%m'),
+                                               #after = row_tuple.CommentWindow.strftime('%Y-%d-%m') )
             
                 punc_dict = {ord('\''):None,ord('+'):' ',ord(';'):' ',ord('\"'):' ',
                          ord('/'):None, ord('('):' ', ord(')'):' ', ord('['):' ',
@@ -68,3 +71,4 @@ class GetRedditComments:
             df.loc[row_tuple.Index,'Game_comments'] = game_comment
             if verbose:
                 print("Game: {}, comment length: {}".format(row_tuple.TitlesHTML,len(game_comment[0])))
+        self.game_df = df

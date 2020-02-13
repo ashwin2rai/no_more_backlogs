@@ -86,9 +86,11 @@ class PricingAndRevs:
         df['HistScrapped'] = link_obt
         df['Reviews'] = rev_obt
         df['GameCard'] = game_ph_obt
+        df['GameCard'] = df['GameCard'].fillna('https://store.playstation.com/store/api/chihiro/00_09_000/container/US/en/19/UP4478-PCSE00649_00-2015072013150003/image?w=240&h=240&bg_color=000000&opacity=100&_version=00_09_000')
         
         self.game_df = df
         self.game_price_dict = game_price_dict
+        return self
         
 
     def _get_price_historyandrev_psprices(self, addr, reg_string, 
@@ -137,9 +139,9 @@ class PricingAndRevs:
             new_addr = self._get_price_history_link(tree, game_name)
             if new_addr is not None:
                 (tree_new, soup_new) = get_web_content(new_addr,'htmlsoup')
-                reg_output = self.get_reg_output(soup_new,reg_string)
-                rev_val = self.get_review(tree_new, rev_xpath)
-                game_ph = self.get_pic_link(tree, pic_xpath)
+                reg_output = self._get_reg_output(soup_new,reg_string)
+                rev_val = self._get_review(tree_new, rev_xpath)
+                game_ph = self._get_pic_link(tree, pic_xpath)
                 return (self._convert_price_todataframe(reg_output),True, rev_val, game_ph)
             else:
                 return (None,False,np.nan,np.nan)
@@ -481,6 +483,8 @@ class PricingAndRevs:
         df['Release_Year'] = df['ReleaseDate_Agg'].dt.year
         df['Release_Month'] = df['ReleaseDate_Agg'].dt.month
         df['Release_Day'] = df['ReleaseDate_Agg'].dt.day
+        
+        return self
     
     def _logprice_reg_params(self, df_lim, x_col = 'Days', y_col = 'NormLogPrice', days = None, reg_model = False):
         
@@ -514,7 +518,9 @@ class PricingAndRevs:
         try:
             assert df['MappedGenres'].notna().all()
         except:
-            print("WARNING: The Genre CSV needs to be updated")
+            print("WARNING: The Genre CSV needs to be updated. The following Genres need to be mapped:")
+            print([*df['Genres'][df['MappedGenres'].isna()].values])
+            
             
     def _convert_catstrength(self, df,col_name, med_val, low_val):
         val_cts = df[col_name].value_counts()
