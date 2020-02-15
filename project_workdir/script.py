@@ -45,7 +45,7 @@ succes_prob = game_success.load_model(clf = 'gradbooststep').predict_proba(featu
 complete_gamedb(game_df, succes_prob)
 write_tocsv(game_df, fname = 'game_list_withpreds.csv')
 #create_postgres_authdict(user='username', password='3124hash', hostandport='51.22.22.22:5432', dbname ='gamedb')
-#sql_pd_write(game_df, create_posgresurl(), 'investigame')
+#sql_pd_write(game_df, create_posgresurl(), 'investigamepred')
 
 
 

@@ -141,7 +141,7 @@ class PricingAndRevs:
                 (tree_new, soup_new) = get_web_content(new_addr,'htmlsoup')
                 reg_output = self._get_reg_output(soup_new,reg_string)
                 rev_val = self._get_review(tree_new, rev_xpath)
-                game_ph = self._get_pic_link(tree, pic_xpath)
+                game_ph = self._get_pic_link(tree_new, pic_xpath)
                 return (self._convert_price_todataframe(reg_output),True, rev_val, game_ph)
             else:
                 return (None,False,np.nan,np.nan)
