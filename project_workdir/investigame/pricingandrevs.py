@@ -10,7 +10,15 @@ import time
 import statsmodels.api as sm
 
 class PricingAndRevs:
+    """
+    Class PricingAndRevs: Used to scrape price histories, reviews, and game images for games in a dataframe of list of PS4 Games.
     
+    Initialization Parameters
+    ----------
+    game_list: Pandas.DataFrame
+        List of PS4 Games ideally obtained from GetWikiGameTable. DataFrame that contains a list of HTML ready search keywords for certain games.
+
+    """    
     def __init__(self, game_list):
         self.game_df = game_list
         self.game_price_dict = None
@@ -19,7 +27,7 @@ class PricingAndRevs:
         self.pic_xpath = '/html/body/div[1]/div[2]/div[3]/div[1]/div[1]/div/div/img/@data-src'
         self.pshist_link = 'https://psprices.com/region-us/search/?q={}&platform=PS4&dlc=hide'
         
-    def get_all_price_histsandrev(self, df = None, col_name = 'TitlesHTML', 
+    def get_all_price_histsandrev(self, col_name = 'TitlesHTML', 
                                   sleep_sec = 1, 
                                   pshist_link = None,
                                   pricehist_reg = None,
@@ -30,9 +38,6 @@ class PricingAndRevs:
         
         Parameters
         ----------
-        df: Pandas.DataFrame
-            DataFrame that contains a list of HTML ready search keywords for certain games
-        
         col_name: str, optional
             The name of the column that contains HTML ready search keywords for certain games
             Default 'TitlesHTML'
@@ -47,10 +52,10 @@ class PricingAndRevs:
         
         Returns
         -------
-        Dict
+        self.game_price_dict: Dict
             game_name:{pricehistory-date dataframe} as key:value pairs.
         
-        Pandas.DataFrame (Shadow)
+        self.game_df: Pandas.DataFrame
             Additional columns added to df 
         
         Notes
@@ -65,9 +70,8 @@ class PricingAndRevs:
             pic_xpath = self.pic_xpath
         if not pricehist_reg:
             pricehist_reg = self.pricehist_reg
-        if not df:
-            df = self.game_df
         
+        df = self.game_df
         game_price_dict ={}
         link_obt = []
         rev_obt = []
@@ -108,17 +112,23 @@ class PricingAndRevs:
             Only needed if there's a possibility that the website link might go into the search page instead of the game page.
             Default None
             
-        reg_string: str, optional
+        reg_string: str
             The regex string to extract date and prices
-            Default r'\"x\"\:\s\"(\d{4}-\d{2}-\d{2})\"\,\s\"y\"\:\s(\d+\.\d+)'
+
+        rev_xpath: str
+            Xpath address that points to review
+
+        pic_xpath: str
+            Xpath address that points to Game Card image
         
         Returns
         -------
-        Tuple of (Pandas.DataFrame, Bool, Float)
+        Tuple of (Pandas.DataFrame, Bool, Float,str)
             DataFrame consists of price history, dates, and other derivatives
             Bool provides an indicator if the data was successfully scraped or not
             Float is the value of review which may be NaN if it cannot be scraped
-            If the price history cannot be extracted, will return (None, False, NaN)
+            Str is the webpage address for the Game Card Image (game cover image)
+            If the price history cannot be extracted, will return (None, False, NaN,NaN)
         
         Notes
         -----
@@ -151,20 +161,21 @@ class PricingAndRevs:
     def _get_review(self, tree, 
                    xpath_adr ='/html/body/div[1]/div[2]/div[3]/div[1]/div[1]/div/div/div/div/a/text()'):
         """
-        Extract specific text 
+        Extract review value
         
         Parameters
         ----------
-        reg_output: List of lists of str
+        tree: html object
+            HTML object for the webpage of interest
+        
+        xpath_adr: str
+            The xpath address that points to the review value
         
         Returns
         -------
-        Pandas.DataFrame
-        
-        Notes
-        -----
-        Specifically used to convert the regex extraction of price history and dates into a DataFrame.
-        
+        Float
+            Value of the review as a float
+                
         """
         try:
             return float(tree.xpath(xpath_adr)[0])
@@ -173,6 +184,23 @@ class PricingAndRevs:
             return np.nan
     
     def _get_pic_link(self, tree, xpath_adr = '/html/body/div[1]/div[2]/div[3]/div[1]/div[1]/div/div/img/@data-src'):
+        """
+        Extract webpage address for the game cover image
+        
+        Parameters
+        ----------
+        tree: html object
+            HTML object for the webpage of interest
+        
+        xpath_adr: str
+            The xpath address that points to the game cover image source address
+        
+        Returns
+        -------
+        Str
+            Web page address that points to the game cover image
+                
+        """
         try:
             return tree.xpath(xpath_adr)[0]
         except:
@@ -222,7 +250,7 @@ class PricingAndRevs:
         
         Raises
         ------
-        Error (str): if no text is extracted
+        AssertError : if no text is extracted
         
         Notes
         -----
@@ -241,20 +269,12 @@ class PricingAndRevs:
         Parameters
         ----------
         script_tag: str
-            html text returned extracted from a BSoup object 
+            html text returned from a BSoup object that contains html text for a webpage of interest
             
         Returns
         -------
-        Pandas.DataFrame object
-        
-        Raises
-        ------
-        Error (str): if issues with list of list commonly from scraping issues
-        Error (str): if issues with datetime conversion
-        
-        Notes
-        -----
-        This function is specifically used to convert a specific WikiTable scraped data into a dataframe.
+        Str
+            Text contains price histories and dates
         """
         find = False
         counter = -1
@@ -318,6 +338,11 @@ class PricingAndRevs:
         Returns
         -------
         Pandas.Series
+
+        Raises
+        ------
+        TypeError: If transformation cannot be performed
+
         
         """
         try:
@@ -336,6 +361,10 @@ class PricingAndRevs:
         Returns
         -------
         Pandas.Series of element type float
+
+        Raises
+        ------
+        TypeError: If transformation cannot be performed
         
         """
     
@@ -443,6 +472,25 @@ class PricingAndRevs:
             return None  
         
     def write_dict(self, data_path=None, fname = 'pricehist_pkl.sav'):
+        """
+        Writes a dictionary as a pickled file for future use        
+        
+        Parameters
+        ----------
+        data_path: Path object, optional
+            A path object that points to the directory where the file will be saved.
+            Default None
+        
+        fname: str, optional
+            Filename for saved file
+            Default 'pricehist_pkl.sav'
+            
+        Returns
+        -------
+        None
+        
+        """
+
         if not data_path:
             fpath = create_datadir_link(filename = fname)
         else:
@@ -455,6 +503,46 @@ class PricingAndRevs:
     def get_prepdf_withreg(self, days = None, 
                            publisher_medval = 18, publisher_lowval = 3,
                           dev_medval = 4, dev_lowval = 1, genre_map = None):
+
+        """
+        Prepares the Game List dataframe by (i) segmenting developers and publishers into 3 categories.
+        (ii) Maps genres to 9 categories.
+        (iii) Aggregates release dates
+        (iv) Writes the linear model parameters
+        (v) Creates a new column with initial price of the game
+        
+        Parameters
+        ----------
+        days: int, optional
+            The number of days to cap the price history analysis
+            Default None
+        
+        publisher_medval: int, optional
+            The capping value for medium throughput publishers. Publishers that have published more or equal to games than this will be considered High throughput.
+            Default 18
+            
+        publisher_lowval: int, optional
+            The capping value for low throughput publishers. Publishers that have published less games than or equal to this will be considered Low throughput.
+            Default 3
+            
+        dev_medval: int, optional
+            The capping value for medium throughput developers.
+            Default 4
+            
+        dev_lowval: int, optional
+            The capping value for low throughput publishers.
+            Default 1
+            
+        genre_map: str, optional
+            Filename of file with genre mapping values. Will default to ../data/genre.csv.
+            Default None
+            
+        Returns
+        -------
+        Pandas.DataFrame
+        
+        """
+        
         df = self.game_df
         game_price_dict = self.game_price_dict
         
@@ -495,7 +583,38 @@ class PricingAndRevs:
         return self
     
     def _logprice_reg_params(self, df_lim, x_col = 'Days', y_col = 'NormLogPrice', days = None, reg_model = False):
+        """
+        Fits linear model to Logtransform price. Returns parameters or optionally the model.
         
+        Parameters
+        ----------
+        df_lim: Pandas.DataFrame
+            DataFrame that contains price histories
+        
+        x_col: str, optional
+            Column name that contains the days (X axis)
+            Default Days
+
+        y_col: str, optional
+            Column name that contains the transformed price data (Y axis)
+            Default NormLogPrice
+            
+        days: int, optional
+            The number of days to cap the price history analysis
+            Default None
+            
+        reg_model: Bool, optional
+            Switch to return model along with the parameters
+            Default False
+            
+        Returns
+        -------
+        Numpy.Array
+            Contains linear model slope and intercept if reg_model is False
+        (Numpy.Array,statsmodels.linearmodel)
+            Contains model array as well as the model if reg_model is True
+        
+        """        
         if not days:
             df = df_lim
         else:
@@ -517,6 +636,22 @@ class PricingAndRevs:
             return model.params
         
     def _convert_genres(self, df, genre_map):
+        """
+        Maps many different Genres to a set of particular genres to reduce genre diversity. Mapping can be specified in a separate csv file.
+        
+        Parameters
+        ----------
+        df: Pandas.DataFrame
+            DataFrame that contains game details
+        
+        genre_map: str, optional
+            Filename of file with genre mapping values.
+            
+        Returns
+        -------
+        Pandas.DataFrame
+            Adds new column with MappedGenres        
+        """  
         genre_transfrm = pd.read_csv(genre_map)
         genre = {}
         for row_label,  row_array_Series in genre_transfrm.iterrows():
@@ -531,6 +666,29 @@ class PricingAndRevs:
             
             
     def _convert_catstrength(self, df,col_name, med_val, low_val):
+        """
+        Creates a new column that maps elements from an original column based on repetitions. Elements that are repeated very frequently will be call High, elements that are not repeated frequently will be called Low and in-between elements will be called Med.
+        
+        Parameters
+        ----------
+        df: Pandas.DataFrame
+            DataFrame that contains details
+        
+        col_name: str
+            Column of interest
+        
+        med_val: int
+            The capping value for medium. Element counts that are more or equal to this are considered High.
+            
+        low_val: int
+            The capping value for low. Element counts that are less or equal to this are considered High.
+
+        Returns
+        -------
+        Pandas.DataFrame
+            Adds new column with MappedColName        
+        """ 
+
         val_cts = df[col_name].value_counts()
         val_dict = {}
         
@@ -548,6 +706,28 @@ class PricingAndRevs:
         df[new_col_name] = df[col_name].map(val_dict)
 
     def get_successcol(self, col='LogRegSlope',threshold = -0.0001, verbose=False):   
-        self.game_df['Success'] = np.where(self.game_df[col] > threshold, 0,1)
+        """
+        Creates a new column that maps a game as a 1 or 0 indicating success or failure based on a threshold.
+        
+        Parameters
+        ----------
+        col_name: str, optional
+            Column of interest to check for using threshold
+            Default LogRegSlope
+        
+        threshold: int, optional
+            If value is below this threshold, that element is mapped to 0, otherwise 1.
+            
+        verbose: Bool, optional
+            Switch to print the count of 0's and 1's
+            Default False
+        
+        Returns
+        -------
+        Pandas.DataFrame
+            Adds new column called Success with 0/1 maps        
+        """ 
+        
+        self.game_df['Success'] = np.where(self.game_df[col] > threshold, 1,0)
         if verbose:
             print(self.game_df['Success'][self.game_df[col].notna()].value_counts())

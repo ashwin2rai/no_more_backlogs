@@ -3,6 +3,14 @@ from .utils import get_web_content
 import pandas as pd
 
 class GetWikiGameTable:
+    """
+    Class GetWikiGameTable: Used to scrape list of all PS4 Games from Wikipedia.
+    
+    Initialization Parameters
+    ----------
+    None
+
+    """
     
     def __init__(self):
         self.assembled_list = None
@@ -30,7 +38,7 @@ class GetWikiGameTable:
             Default = None
         Returns
         -------
-        List of lists
+        self.assembled_list: List of lists
         A list of the first 7 values extracted from the row of a wiki table
         
         Notes
@@ -41,7 +49,7 @@ class GetWikiGameTable:
         html_text = self._get_table_row(tree = tree, xpath = xpath, counter =counter)
     
         if not self.assembled_list:
-            self.assembled_list = []
+            self.assembled_list = [] #Size mutable since table might be stretched over multiple wiki pages 
     
         while html_text:
             self.assembled_list.append(self._get_cleaned_row(html_text))
@@ -68,11 +76,11 @@ class GetWikiGameTable:
             
         Returns
         -------
-        tree.xpath(xpath.format(counter))
+        tree.xpath(xpath.format(counter)): str
         
         Raises
         ------
-        Error (str): if tree.xpath(xpath.format(counter)) cannot return an object
+        ValueError (str): if tree.xpath(xpath.format(counter)) cannot return an object
             
         Notes
         -----
@@ -94,12 +102,12 @@ class GetWikiGameTable:
             text extracted from the html script of a row of a wiki table 
         Returns
         -------
-        List
+        cleaned_html_text: List
             A list of the first 7 values extracted from the row of a wiki table
             
         Notes
         -----
-        This function is specifically used to pull values from rows of a specific WikiTable
+        This function is specifically used to pull values from rows of a specific WikiTable. Can be refractored in the future for a more elegant solution.
         """    
         cleaned_html_text=[]
         
@@ -128,18 +136,20 @@ class GetWikiGameTable:
         
         columns: List of str, optional
             This will be used to create the column headers of the dataframe.
-            The last three columns 
             Default ['Titles','Genres','Developers','Publishers','ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
+
+        release_lit: List of str, optional
+            The release date columns 
+            Default ['ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
             
         Returns
         -------
-        Pandas.DataFrame object
+        self.game_df: Pandas.DataFrame object
         
         Raises
         ------
-        Error (str): if issues with list of list commonly from scraping issues
-        Error (str): if issues with datetime conversion
-        
+        ValueError: if issues converting list of list into dataframe commonly from scraping issues
+   
         Notes
         -----
         This function is specifically used to convert a specific WikiTable scraped data into a dataframe.
