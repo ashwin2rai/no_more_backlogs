@@ -68,7 +68,10 @@ def preset_output():
     
     game_same_pubs = sql_readaspd(create_posgresurl(),publisher_query(game_info['Publishers'].values[0]))
 #    game_same_pubs = sql_readaspd(sqlurl,publisher_query(game_info['Publishers'].values[0]))
-    game_same_pubs = game_same_pubs.drop(game_info.index,axis=0)
+    try:
+        game_same_pubs = game_same_pubs.drop(game_info.index,axis=0)
+    except:
+        pass
 
     template = """<div class="media-object stack-for-small">
             <div class="media-object-section">
@@ -109,7 +112,10 @@ def preset_output():
 
     game_same_devs = sql_readaspd(create_posgresurl(),dev_query(game_info['Developers'].values[0]))
 #    game_same_devs = sql_readaspd(sqlurl,dev_query(game_info['Developers'].values[0]))
-    game_same_devs = game_same_devs.drop(game_info.index,axis=0)
+    try:
+        game_same_devs = game_same_devs.drop(game_info.index,axis=0)
+    except:
+        pass
 
     pub_text = ''
 
