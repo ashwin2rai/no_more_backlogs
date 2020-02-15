@@ -28,7 +28,7 @@ write_tocsv(game_dets_withcomments.game_df, fname = 'game_list_withtext.csv')
 game_pred = AutoClassifier(game_dets_withcomments.game_df[['Reviews', 'InitPrice',
        'MappedGenres', 'MappedPublishers', 'MappedDevelopers',
                     'Release_Year', 'Release_Month', 'Release_Day',
-       'Game_comments','Success']])
+       'Game_comments','Success']], text_col = 'Game_comments')
 game_pred.preprocess_block()
 game_pred.shallow_model_fit()
 
@@ -38,7 +38,7 @@ game_df = game_dets_withcomments.game_df
 game_success = AutoClassifier(game_df[['Reviews', 'InitPrice',
        'MappedGenres', 'MappedPublishers', 'MappedDevelopers',
                     'Release_Year', 'Release_Month', 'Release_Day',
-       'Game_comments','Success']])
+       'Game_comments','Success']],text_col='Game_comments')
 feature_set = game_success.preprocess_block(load_preproc = 'preproc.sav')
 succes_prob = game_success.load_model(clf = 'gradbooststep').predict_proba(feature_set)
 
