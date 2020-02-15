@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# Think about how the last column (target column) should be, category or binary 
-
 from .utils import create_dir_link
 
 import pandas as pd
@@ -10,7 +7,21 @@ import pickle
 
 
 class AutoClassifier:
+    """
+    Class AutoClassifier: AutoClassifier is a stand along package that can be used to create a pipeline to perform binary classification almost instantly.
+    It performs data cleaning, converts eligible features into categories, imputatotion, feature selection, NLP, fits several classification models including a DNN model, performs hyperparameter tuning, and generates predictions with minimal user input.
     
+     
+    Initialization Parameters
+    ----------
+    orig_df: Pandas.DataFrame
+        DataFrame with features and targets. Only two requirements for this is (i) the target vector should be binary and should be int or category type and should be the last column of the dataframe; (ii) All text columns should be concatenated into a single text feature vector.
+    
+    text_col: str, optional
+        The name of the column with text. If text_col is provided, NLP methods will be applied to it. If None, then analysis is considered Non-NLP.
+        Default None
+        
+    """  
     def __init__(self, orig_df, text_col=None):
         assert orig_df.iloc[:,-1].value_counts().shape[0] == 2, "Error: The last column should be the target column and should be binary (True/False, 0/1, Success/Failure etc.) "
         
@@ -25,24 +36,68 @@ class AutoClassifier:
                      text_fillna = 'No Text', text_clean=False, pre_proc_filename = 'preproc.sav'):
         """
         Preprocessing block: used to preprocess and transform the data columns
-        ---------------------------------------------------------------------------
-        -df_all (DataFrame): DataFrame with all the data, last column should be 
-        target variable
-        -text_col (str): name of the text column, default is None for no text columns
-        -cat_var_limit (int):tai greatest number of unique values in a column to qualify 
-        for conversion into a category column 
-        -bin_rep (int): style of integer representation for category variables, 0 for 
-        binary integer representation, 1 for 0 to nclass-1 representation
-        -max_tfidf_features (int): maximum number of features after vectorizing text 
-        column using tfidf metric
-        -ngram_range (tuple): 2 tuple consisting of start and end point of ngram
-        -use_feat_select (bool): True for applying feature selection using LASSO for 
-        non-text columns
-        -alpha_space (array of float): testing space for alpha parameter of LASSO
-        -random_state_var (int): Random seed for train-test-split
-        -test_size_var (float): ratio of test versus train split 
-        -load_preproc
-        ---------------------------------------------------------------------------
+
+        Parameters
+        ----------
+
+        cat_var_limit: int, optional
+            the greatest number of unique values in a column to qualify for conversion into a category column 
+            Default 10
+        
+        bin_rep: int, optional
+            style of integer representation for category variables, 0 for binary integer representation (OneHotEncode), 1 for 0 to nclass-1 representation
+            Default 1
+            
+        max_tfidf_features: int, optional
+            maximum number of features to be used after vectorizing text column using tfidf metric
+            Default 100
+            
+        ngram_range: tuple, optional
+            2 tuple consisting of start and end point of ngram
+            Default (1,2)
+            
+        use_feat_select: bool, optional
+            If True then feature selection using LASSO for non-text columns is applied. Otherwise no feature selection will be performed
+            Default True
+        
+        alpha_space: Numpy.array, optional
+            Testing space for alpha parameter of LASSO used in hyperparameter tuning
+            Default np.linspace(0.01,0.02,20) 
+            
+        random_state_var: int, optional
+            Random seed for train-test-split
+            Default np.random.randint(10000)
+        
+        test_size_var: float, optional
+            Ratio of test versus train split
+            Default 0.3
+
+        text_fillna: str, optional
+            Used to fill Empty elements in the text column
+            Default No Text
+            
+        text_clean: Bool, optional
+            If True then text is cleaned using regEx
+            Default False
+            
+        pre_proc_filename: str, optional
+            Preprocessor trained on this dataset will be saved using this filename. Next dataset can be preprocessed by loading this file. Only activated if preprocessor was not previously loaded. 
+            Default: preproc.sav
+            
+        load_preproc: str, optional
+            This loads the preprocessor trained on a training set. Use consistent preprocessing.
+            If None then preprocessing is performed from scratch.
+            Default None
+
+        Returns
+        -------
+        
+        4 - Tuple
+            If preprocessing was run from scratch (load_preproc is None). Tuple includes train test matrices and vectors (x_train,x_test,y_train,y_test)
+        
+        Numpy.Array
+            If preprocess was loaded (load_preproc is Not None). This is X matrix which is ready to be passed into the predict method. 
+            
         """
         if load_preproc is None:        
             pre_proc_dict = {}
@@ -95,7 +150,28 @@ class AutoClassifier:
                 return df_preproc.values
 
     def _preprocess_df(self, df_all, pre_proc_dict, preproc):
-    
+        """
+        Method for preprocessing Non-text columns
+        
+        Parameters
+        ----------
+
+        df_all: Pandas.DataFrame
+            Original DataFrame to be preprocessed
+        
+        pre_proc_dict: dict
+            dictionary containing preprocessing objects
+
+        preproc: str
+            Filename of a previously trained preprocessor. Used here as an indicator, if None then preprocessing is being done for scratch.
+
+        Returns
+        -------
+        
+        Pandas.DataFrame
+            Preprocessed non-text dataframe
+        """
+
         text_col = pre_proc_dict['text_col']
         cat_var_limit = pre_proc_dict['cat_var_limit']
         bin_rep = pre_proc_dict['bin_rep']
@@ -134,7 +210,27 @@ class AutoClassifier:
         return df
 
     def _preprocess_df_text(self, df_all, pre_proc_dict, preproc):
+        """
+        Method for preprocessing text column
         
+        Parameters
+        ----------
+
+        df_all: Pandas.DataFrame
+            Original DataFrame to be preprocessed
+        
+        pre_proc_dict: dict
+            dictionary containing preprocessing objects
+
+        preproc: str
+            Filename of a previously trained preprocessor. Used here as an indicator, if None then preprocessing is being done for scratch.
+
+        Returns
+        -------
+        
+        Numpy.Array
+            Preprocessed text TfIDF matrix
+        """        
         from sklearn.feature_extraction.text import TfidfVectorizer 
         
         text_col = pre_proc_dict['text_col']
@@ -164,8 +260,19 @@ class AutoClassifier:
 
     def _clean_text(self, text_series):
         """
-        Cleans a column of Tweets. Removes all special characters, 
-        websites, mentions.
+        Cleans a column of text. Removes all special characters, 
+        websites, mentions etc.
+        
+        Parameters
+        ----------
+
+        text_series: Pandas.Series
+        
+        Returns
+        -------
+        
+        Pandas.Series
+            Cleaned text
         """
         from re import sub as resub
         text_series = text_series.apply(
@@ -177,8 +284,25 @@ class AutoClassifier:
     def _convert_cat_cols(self, df, cat_var_limit=10, verbose=False):                
         """
         Converts columns with a small amount of unique values that are of
-        type Object into categorical variables.
-        Number of unique values defined by cat_var_limit
+        type Object into categorical variables. Number of unique values defined by cat_var_limit
+        
+        Parameters
+        ----------
+
+        df: Pandas.DataFrame
+        
+        cat_var_limit: int, optional
+            the greatest number of unique values in a column to qualify for conversion into a category column 
+            Default 10
+            
+        Verbose: bool
+            If True prints summary of conversion
+        
+        Returns
+        -------
+        
+        Pandas.DataFrame
+            DataFrame with eligible columns converted into categoory columns
         """
         cat_var_true = df.apply(lambda x: 
                                 len(x.value_counts()) < cat_var_limit)
@@ -193,6 +317,16 @@ class AutoClassifier:
     def _impute_most_freq(self, df):
         """
         Imputes the most frequent value in place of NaN's
+        
+        Parameters
+        ----------
+
+        df: Pandas.DataFrame
+        
+        Returns
+        -------
+        
+        Pandas.DataFrame
         """
         most_freq = df.apply(lambda x: x.value_counts().index[0])
         return df.fillna(most_freq)
@@ -200,6 +334,24 @@ class AutoClassifier:
     def _convert_cat_labels(self, df, pre_proc_dict, preproc):
         """
         Converts columns with factors into integer representation
+        
+        Parameters
+        ----------
+
+        df: Pandas.DataFrame
+        
+        pre_proc_dict: dict
+            dictionary containing preprocessing objects
+
+        preproc: str
+            Filename of a previously trained preprocessor. Used here as an indicator, if None then preprocessing is being done for scratch.
+        
+        Returns
+        -------
+        
+        Pandas.DataFrame
+            DataFrame with eligible columns converted into 0 to nclass-1 integer representation
+
         """
         from sklearn.preprocessing import LabelEncoder
         if preproc is None:
@@ -216,7 +368,25 @@ class AutoClassifier:
     
     def _convert_cat_onehot(self, df, pre_proc_dict, preproc):
         """
-        Converts columns with factors into integer representation
+        Converts columns with factors into OneHotEncode integer representation
+        
+        Parameters
+        ----------
+
+        df: Pandas.DataFrame
+        
+        pre_proc_dict: dict
+            dictionary containing preprocessing objects
+
+        preproc: str
+            Filename of a previously trained preprocessor. Used here as an indicator, if None then preprocessing is being done for scratch.
+        
+        Returns
+        -------
+        
+        Pandas.DataFrame
+            DataFrame with eligible columns converted into OnehotEncoded integer representation
+
         """
         from sklearn.preprocessing import OneHotEncoder
         if preproc is None:
@@ -242,6 +412,45 @@ class AutoClassifier:
         variable and n features. Test train split is also performed and only 
         splits of selected features are returned. Feature selection performed 
         using LASSO weight shrinking.
+
+        Parameters
+        ----------
+        df: Pandas.DataFrame
+
+        pre_proc_dict: dict
+            dictionary containing preprocessing objects
+
+        pre_proc_filename: str
+            Filename used to save the preprocessor 
+            
+        text_mat: str, optional
+            text column name
+            Default None
+            
+        use_feat_select: bool, optional
+            If True then feature selection using LASSO for non-text columns is applied. Otherwise no feature selection will be performed
+            Default True
+        
+        alpha_space: Numpy.array, optional
+            Testing space for alpha parameter of LASSO used in hyperparameter tuning
+            Default np.linspace(0.01,0.02,20) 
+            
+        random_state_var: int, optional
+            Random seed for train-test-split
+            Default np.random.randint(10000)
+        
+        test_size_var: float, optional
+            Ratio of test versus train split
+            Default 0.3
+
+        plot: bool, optional
+            If True then feature selection is vizualized by plotting the feature coef after LASSO.
+            Default True
+
+        Returns
+        -------
+        None
+            Important features are saved after feature selection. Train test splits are saved as attributes self.x_train, self.x_test, self.y_train, self.y_test. Preprocessor is saved as a pickled file using filename pre_proc_filename.
         """
         from sklearn.model_selection import train_test_split
         from sklearn.model_selection import GridSearchCV
@@ -307,29 +516,55 @@ class AutoClassifier:
         
         The function will also run a 5 fold cross validated grid search for 
         hyperparameter optimization
-        ---------------------------------------------------------------------------
-        -x_train (DataFrame or ndarray): Training data consisting of features   
-        -x_test (DataFrame or ndarray): Testing data consisting of features
-        -y_train (DataFrame, Series or ndarray): Training data for predictions 
-        (single class only)   
-        -y_train (DataFrame, Series or ndarray): Testing data for predictions 
-        (single class only)   
-        -scaler_ch (int): Decides which scaler to use, 0 for MinMaxScaler, 1 for 
-        Normalizer, 2 for StandarScaler
-        -logreg_C (list of float): Hyperparameter space for C to be used in the 
-        Log Reg Classifier
-        -knn_neigh (list of int): Hyperparameter space for number of neighbors to 
-        be used in the KNN Classifier
-        -svc_c (list of float): Hyperparameter space for C to be used in the 
-        Support Vector Classifier
-        -gb_max_depth (list of int): Hyperparameter space for max depth to be used 
-        in Gradient Boosted Classifier Trees
-        -gb_n_est (list of int): Hyperparameter space for number of estimators to 
-        be used in Gradient Boosted Classifier Trees
-        -verbose (bool): Prints out details if True
-        -save (bool): Switch for saving the trained models in an external data file
-        -model_file (str): Filename for storing all the trained models
-        ---------------------------------------------------------------------------
+        
+        Parameters
+        ----------
+        
+        scaler_ch: int, optional
+            Decides which scaler to use, 0 for MinMaxScaler, 1 for Normalizer, 2 for StandarScaler
+            Default 0
+            
+        logreg_C: List(float), optional
+            Hyperparameter space for C to be used in the Log Reg Classifier
+            Default [0.8,1,1.2,1.4]
+            
+        knn_neigh: List(int) , optional
+            Hyperparameter space for number of neighbors to be used in the KNN Classifier
+            Default np.arange(3,16)
+            
+        svc_c: List(Float), optional
+            Hyperparameter space for C to be used in the Support Vector Classifier
+            Default [0.5,1,1.5,2,2.5,2.6]
+
+        gb_max_depth: List(int), optional
+            Hyperparameter space for max depth to be used in Gradient Boosted Classifier Trees
+            Default [2,3,4,5]
+        
+        gb_n_est: List(int) , optional
+            Hyperparameter space for number of estimators to be used in Gradient Boosted Classifier Trees
+            Default [40,60,80,100]
+        
+        verbose: bool, optional
+            Prints out summary of fits if True
+            Default True
+            
+        save: bool, optional
+            Switch for saving the trained models in an external data file
+            Default True
+            
+        scoring: str, optional
+            Scoring metric
+            Default accuracy
+        
+        model_file: str, optional
+            Filename for storing all the trained models
+            Default Trained_shallow_models
+        
+        Returns
+        -------
+        Self
+            Trained models are saved as attribute in self.model_dict
+        
         """   
         from sklearn.preprocessing import MinMaxScaler
         from sklearn.preprocessing import Normalizer
@@ -379,6 +614,7 @@ class AutoClassifier:
             pickle.dump(model_dict, open(create_dir_link(filename=model_file), 'wb'))
         
         self.model_dict = model_dict
+        return self
     
     def deep_model_fit(self, scaler_ch=0, 
                    patience_val=2, validation_split_val=.2, epochs_val=20,
@@ -392,26 +628,42 @@ class AutoClassifier:
         Normalizer 
         StandardScaler
         
-        ---------------------------------------------------------------------
-        -x_train (DataFrame or ndarray): Training data consisting of features   
-        -x_test (DataFrame or ndarray): Testing data consisting of features
-        -y_train (DataFrame, Series or ndarray): Training data for predictions 
-        (single class only)   
-        -y_train (DataFrame, Series or ndarray): Testing data for predictions 
-        (single class only)    
-        -scaler_ch (int): Decides which scaler to use, 0 for MinMaxScaler, 
-        1 for Normalizer, 2 for StandarScaler
-        -patience_val (int): Number of epochs to monitor before exiting 
-        training if no major changes in accuracy occurs
-        -validation_split_val (float): ratio of split of dataset for testing 
-        purposes
-        -epochs_val (int): Max number of epochs to train
-        -verbose (bool): Model training details will be printed out if True
-        -save (bool): Switch for saving the trained models in an external data 
-        file
-        -model_file (str): Filename for storing the trained model. Must be H5 
-        extension
-        ----------------------------------------------------------------------
+        Parameters
+        ----------
+           
+        scaler_ch: int, optional
+            Decides which scaler to use, 0 for MinMaxScaler, 1 for Normalizer, 2 for StandarScaler
+            Default 0
+            
+        patience_val: int, optional
+            Number of epochs to monitor before exiting training if no major changes in accuracy occurs
+            Default 2
+            
+        validation_split_val: float, optional
+            ratio of split of dataset for testing purposes
+            Default .2
+            
+        epochs_val: int, optional
+            Max number of epochs to train
+            Default 20
+            
+        verbose: bool, optional
+            Model training details will be printed out if True
+            Default True
+            
+        save: bool, optional
+            Switch for saving the trained models in an external data file
+            Default True
+            
+        model_file: str, optional
+            Filename for storing the trained model. Must be h5 extension 
+            Default Trained_deep_model.h5
+            
+        Returns
+        -------
+        Self
+            DNN model is saved as an attribute in self.model
+        
         """   
         from sklearn.preprocessing import MinMaxScaler
         from sklearn.preprocessing import Normalizer
@@ -463,6 +715,7 @@ class AutoClassifier:
             model.save(create_dir_link(filename=model_file))   
         
         self.model = model
+        return self
 
 
     def load_model(self, type_model='shallow', filename='Trained_shallow_models.sav', 
@@ -471,18 +724,35 @@ class AutoClassifier:
         This function is used to load a previously saved trained model. 
         The model will have been saved in an external file.
         
-        ---------------------------------------------------------------------
-        -type (str): 'shallow' to load a trained shallow model, 
-        'deep' to load a trained deep model
-        -filename (str): Name of the file with the saved model
-        -clf (str): Only used for retrieving shallow models, this is the label 
-        of the classifier -
-        'logreg': Logistic Regression using the lbfgs solver
-        'knnstep': K Nearest Neighbors
-        'svcstep': Support Vector Classification model
-        'gradbooststep': Gradient Boosted Classification Trees
-        ---------------------------------------------------------------------
+        Parameters
+        ----------
+        
+        type: str, optional
+            'shallow' to load a trained shallow model 'deep' to load a trained deep model
+            Default shallow
+            
+        filename: str, optional
+            Name of the file with the saved model
+            Default Trained_shallow_models.sav
+            
+        clf: str, optional
+            Only used for retrieving shallow models, this is the label of the classifier -
+            'logreg': Logistic Regression using the lbfgs solver
+            'knnstep': K Nearest Neighbors
+            'svcstep': Support Vector Classification model
+            'gradbooststep': Gradient Boosted Classification Trees
+            Default logreg
+            
+        Return
+        ------
+        Self
+            Selected model is saved as attribute in self.model
+            
+        Raises
+        ------
+        IOError: If saved files cannot be loaded
         """
+        
         assert (type_model in ['shallow','deep']), "ERROR: Wrong label for argument 'type'." 
         if type_model == 'shallow':
             try:
@@ -508,6 +778,28 @@ class AutoClassifier:
             return self
 
     def predict(self, val_mat, clf = None):
+        """
+        Method used to generate predictions using selected model
+
+        Parameters
+        ----------
+        val_mat : Numpy.Ndarray or Pandas.Dataframe
+            Feature matrix (X values)
+        clf : str, optional
+            Used to load model ONLY if load method was NOT used previously. 
+            Default None
+
+        Returns
+        -------
+        Numpy.array
+            binary prediction vector 
+            
+        Raises
+        ------
+        ValueError: Model was not loaded correctly.
+
+        """
+        
         if not clf:
             try:
                 return self.model.predict(val_mat)
@@ -520,6 +812,27 @@ class AutoClassifier:
                 raise ValueError('ERROR: Could not predict. Check if model is loaded.')
             
     def predict_proba(self, val_mat, clf = None):
+        """
+        Method used to generate prediction probabilities using selected model
+
+        Parameters
+        ----------
+        val_mat : Numpy.Ndarray or Pandas.Dataframe
+            Feature matrix (X values)
+        clf : str, optional
+            Used to load model ONLY if load method was NOT used previously. 
+            Default None
+
+        Returns
+        -------
+        Numpy.array
+            binary prediction probability matrix shape (N,2) 
+            
+        Raises
+        ------
+        ValueError: Model was not loaded correctly.
+
+        """
         if not clf:
             try:
                 return self.model.predict_proba(val_mat)
@@ -532,6 +845,31 @@ class AutoClassifier:
                 raise ValueError('ERROR: Could not predict. Check if model is loaded.')
 
     def score(self, x_test, y_test, clf = None):
+        """
+        Method used to generate prediction scores using selected model
+
+        Parameters
+        ----------
+        x_test : Numpy.Ndarray or Pandas.Dataframe
+            Feature matrix (X values)
+
+        x_test : Numpy.Ndarray or Pandas.Series
+            Target vector of Ground truths used to compare predictions with 
+            
+        clf : str, optional
+            Used to load model ONLY if load method was NOT used previously. 
+            Default None
+
+        Returns
+        -------
+        Float
+            Score of predictions. Same scoring metric specified during fitting will be used.
+            
+        Raises
+        ------
+        ValueError: Model was not loaded correctly.
+
+        """
         if not clf:
             try:
                 return self.model.score(x_test, y_test)
