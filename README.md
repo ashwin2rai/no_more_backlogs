@@ -4,15 +4,15 @@
 
 Investors, resellers, and gaming enthusiasts are always interested in knowing if a new video game will be commercially sucessful. This information can be used in a variety of ways but most importantly as a signal for investment decisions since the gaming market is very volatile.
 
-Investigame uses Machine Learning tools and the AutoClassifier package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day.
+Investigame uses Machine Learning tools and the `AutoClassifier` package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day through `Cron`.
 
-This project was developed as part of the Insight Data Science program. The end-to-end pipeline was developed in 4 weeks with the timeline being:
+This project was developed as part of the [**Insight Data Science**](https://www.insightdatascience.com/) program at Toronto, Jan 2020 session. The end-to-end pipeline was developed in 4 weeks with the timeline being:
 - 1st Week: brainstorming and feedback
 - 2nd Week: EDA, model MVP
 - 3rd Week: web-app MVP
 - 4th Week: polished MVP and code, presentation for business case
 
-##### Contact
+### Contact
 - Author: Ashwin Rai
 - Email: ashwin2rai@gmail.com
 - Linkedin: https://www.linkedin.com/in/ashwin2rai/
