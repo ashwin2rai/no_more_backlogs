@@ -8,8 +8,8 @@ import pickle
 
 class AutoClassifier:
     """
-    Class AutoClassifier: AutoClassifier is a stand along package that can be used to create a pipeline to perform binary classification almost instantly.
-    It performs data cleaning, converts eligible features into categories, imputatotion, feature selection, NLP, fits several classification models including a DNN model, performs hyperparameter tuning, and generates predictions with minimal user input.
+    Class AutoClassifier: AutoClassifier is a stand alone package that can be used to create a pipeline to perform binary classification almost instantly.
+    It performs data cleaning, converts eligible features into categories, imputatation, feature selection, NLP, fits several classification models including a DNN model, performs hyperparameter tuning, and generates predictions with minimal user input.
     
      
     Initialization Parameters
@@ -20,10 +20,14 @@ class AutoClassifier:
     text_col: str, optional
         The name of the column with text. If text_col is provided, NLP methods will be applied to it. If None, then analysis is considered Non-NLP.
         Default None
+
+    Raises
+    ------
+    AssertError: Raised if target vector is non-binary
         
     """  
     def __init__(self, orig_df, text_col=None):
-        assert orig_df.iloc[:,-1].value_counts().shape[0] == 2, "Error: The last column should be the target column and should be binary (True/False, 0/1, Success/Failure etc.) "
+        assert orig_df.iloc[:,-1].value_counts().shape[0] == 2, "ERROR: The last column should be the target column and should be binary (True/False, 0/1, Success/Failure etc.) "
         
         self.orig_df = orig_df
         self.text_col = text_col
