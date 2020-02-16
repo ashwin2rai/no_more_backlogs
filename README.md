@@ -34,22 +34,22 @@ AutoClassifier is a stand alone package, developed by the author, that can be us
 
 ### Directory navigation
 
-- data: Folder used to dump data after package execution. Contains Genre map CSV and excel file showing stock variation with product release
-- env: Contains `conda` environment file
-- images: Contains images used in Readme
-- project_workdir: Primary folder with source code
-  - autoclassifier: Folder containing all source code for the `AutoClassifier` package
-  - investigame: Folder containing all source code for the `InvestiGame` package
-  - FlaskApp: Source code for Web App executed using `Flask`
-    - templates: Folder containing HTML templates used by the Web App to render pages
-    - server.py: Python source code for Web App
-  - requirements.text: Details dependencies for the packages
-  - setup.py: Setup file for use with `pip`
-  - script.py: Simple but complete execution of the `InvestiGame` package
-  - test_func.py: Basic unit testing for `InvestiGame` package, use with pytest
-- LICENSE: MIT license
-- .gitignore: Files to ignore in Git
-- README.md: This readme file
+- **data**: Folder used to dump data after package execution. Contains Genre map CSV and excel file showing stock variation with product release
+- **env**: Folder containing `conda` environment file
+- **images**: Folder containing images used in Readme
+- **project_workdir**: Primary folder with source code
+  - **autoclassifier**: Folder containing all source code for the `AutoClassifier` package
+  - **investigame**: Folder containing all source code for the `InvestiGame` package
+  - **FlaskApp**: Folder containing source code for Web App executed using `Flask`
+    - **templates**: Folder containing HTML templates used by the Web App to render pages
+    - *server.py*: Python source code for Web App
+  - *requirements.txt*: Details dependencies for the packages
+  - *setup.py*: Setup file for use with `pip`
+  - *script.py*: Simple but complete execution of the `InvestiGame` package
+  - *test_func.py*: Basic unit testing for `InvestiGame` package, use with `pytest`
+- *LICENSE*: MIT license
+- *.gitignore*: Files to ignore in Git
+- *README.md*: This readme file
     
 
 
