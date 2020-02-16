@@ -1,6 +1,6 @@
-# Investigame
-
 ![Investigame Logo](/images/logo.png)
+
+# Investigame
 
 Investors, resellers, and gaming enthusiasts are always interested in knowing if a new video game will be commercially sucessful. This information can be used in a variety of ways but most importantly as a signal for investment decisions since the gaming market is very volatile.
 
