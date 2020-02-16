@@ -40,13 +40,13 @@ AutoClassifier is a stand alone package, developed by the author, that can be us
 - project_workdir: Primary folder with source code
   - autoclassifier: Folder containing all source code for the `AutoClassifier` package
   - investigame: Folder containing all source code for the `InvestiGame` package
-  - investigame_tests: Folder containing unit tests for the package
   - FlaskApp: Source code for Web App executed using `Flask`
     - templates: Folder containing HTML templates used by the Web App to render pages
     - server.py: Python source code for Web App
   - requirements.text: Details dependencies for the packages
   - setup.py: Setup file for use with `pip`
   - script.py: Simple but complete execution of the `InvestiGame` package
+  - test_func.py: Basic unit testing for `InvestiGame` package, use with pytest
 - LICENSE: MIT license
 - .gitignore: Files to ignore in Git
 - README.md: This readme file
