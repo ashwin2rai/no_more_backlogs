@@ -144,7 +144,8 @@ class GetWikiGameTable:
             
         Returns
         -------
-        self.game_df: Pandas.DataFrame object
+        self
+            self.game_df contains the scraped and converted Pandas.DataFrame object
         
         Raises
         ------
@@ -179,4 +180,5 @@ class GetWikiGameTable:
         ps4_game_list['TitlesHTML'] = ps4_game_list['Titles'].str.replace('\.0',' 0').str.replace('\.1',' 1').str.replace('\.5',' 5').str.replace(' -',' ').str.replace('//',' ').str.translate(punc_dict).str.replace('  ',' ').str.strip().str.lower().str.replace(' ','+')
         
         self.game_df = ps4_game_list
+        return self
         
