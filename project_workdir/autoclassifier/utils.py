@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from .config import preproc_dir_var 
+from .config import preproc_dir_var
 
 
-def create_dir_link(data_path = preproc_dir_var,
-                        filename = 'text.csv'):
+def create_dir_link(data_path=preproc_dir_var,
+                    filename='text.csv'):
     """
     Used to create a str that contains path to file using a Path object.
     
@@ -21,11 +21,11 @@ def create_dir_link(data_path = preproc_dir_var,
     -------
     str
         Path to filename
-    """  
-    return str(data_path/filename)
+    """
+    return str(data_path / filename)
 
 
-def write_tocsv(df, data_path=None, fname = 'file.csv'):
+def write_tocsv(df, data_path=None, fname='file.csv'):
     """
     Writes a DataFrame to csv using the paths provided in the config files.
     
@@ -47,11 +47,10 @@ def write_tocsv(df, data_path=None, fname = 'file.csv'):
              
     """
     if not data_path:
-        fpath = create_dir_link(filename = fname)
+        fpath = create_dir_link(filename=fname)
     else:
-        fpath = create_dir_link(data_path = data_path, filename = fname)
+        fpath = create_dir_link(data_path=data_path, filename=fname)
     try:
         df.to_csv(fpath)
     except:
         print('WARNING: Could not save file, check if dataframe was created properly or path is right.')
-

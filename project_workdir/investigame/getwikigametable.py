@@ -1,5 +1,4 @@
 from .utils import get_web_content
-
 import pandas as pd
 
 class GetWikiGameTable:
@@ -11,7 +10,7 @@ class GetWikiGameTable:
     None
 
     """
-    
+
     def __init__(self):
         self.assembled_list = None
         self.game_df = None
@@ -19,8 +18,8 @@ class GetWikiGameTable:
         self.html_add_0_m = 'https://en.wikipedia.org/wiki/List_of_PlayStation_4_games'
         self.xpath_m_z = '/html/body/div[3]/div[3]/div[4]/div/table/tbody/tr[{}]//text()'
         self.html_add_m_z = 'https://en.wikipedia.org/wiki/List_of_PlayStation_4_games_(M-Z)'
-        
-    def get_wiki_table_list(self, addr, xpath, counter = 3):
+
+    def get_wiki_table_list(self, addr, xpath, counter=3):
         """
         Returns a list of list containing the first 7 values from each row of a Wikitable
     
@@ -34,7 +33,8 @@ class GetWikiGameTable:
         counter: int
             the starting point of the xpath address. Used to skip the headers of a WikiTable
         assembled_list: list of lists, optional
-            the output of get_wiki_table_list. Can be used to aggregate data from multiple tables in a recursive way.
+            the output of get_wiki_table_list. Can be used to aggregate data from multiple
+             tables in a recursive way.
             Default = None
         Returns
         -------
@@ -45,20 +45,19 @@ class GetWikiGameTable:
         -----
         This function is specifically used to pull values from rows of a specific WikiTable
         """
-        tree = get_web_content(addr,'html')
-        html_text = self._get_table_row(tree = tree, xpath = xpath, counter =counter)
-    
+        tree = get_web_content(addr, 'html')
+        html_text = self._get_table_row(tree=tree, xpath=xpath, counter=counter)
+
         if not self.assembled_list:
-            self.assembled_list = [] #Size mutable since table might be stretched over multiple wiki pages 
-    
+            self.assembled_list = []  # Size mutable since table might be stretched over multiple wiki pages
+
         while html_text:
             self.assembled_list.append(self._get_cleaned_row(html_text))
             counter += 1
             html_text = self._get_table_row(tree, xpath, counter)
-        
+
         return self
 
-    
     def _get_table_row(self, tree, xpath, counter):
         """
         Returns the output of html.xpath(xpath address) given an xpath address.
@@ -89,8 +88,9 @@ class GetWikiGameTable:
         try:
             return tree.xpath(xpath.format(counter))
         except:
-            raise ValueError('ERROR: Cannot extract table rows, check Xpath path and/or row index where content starts (int(counter))')
-        
+            raise ValueError(
+                'ERROR: Cannot extract table rows, check Xpath path and/or row index where content '
+                'starts (int(counter))')
 
     def _get_cleaned_row(self, html_text):
         """
@@ -107,25 +107,26 @@ class GetWikiGameTable:
             
         Notes
         -----
-        This function is specifically used to pull values from rows of a specific WikiTable. Can be refractored in the future for a more elegant solution.
-        """    
-        cleaned_html_text=[]
-        
-        for i in range(len(html_text)-1):
-            if html_text[i] != '\n' and html_text[i+1] != '\n':
+        This function is specifically used to pull values from rows of a specific WikiTable.
+        Can be refractored in the future for a more elegant solution.
+        """
+        cleaned_html_text = []
+
+        for i in range(len(html_text) - 1):
+            if html_text[i] != '\n' and html_text[i + 1] != '\n':
                 j = 1
-                while html_text[i+j] != '\n':
-                    html_text[i] = html_text[i] + html_text[i+j]
-                    html_text[i+j] = '\n'
+                while html_text[i + j] != '\n':
+                    html_text[i] = html_text[i] + html_text[i + j]
+                    html_text[i + j] = '\n'
                     j += 1
-    
+
         for elem in html_text:
             if elem != '\n':
-                cleaned_html_text.append(elem.replace('\n',''))
-        
+                cleaned_html_text.append(elem.replace('\n', ''))
+
         return cleaned_html_text[0:7]
-    
-    def get_wiki_table_df(self, full_list = None, columns=None,release_list = None):
+
+    def get_wiki_table_df(self, full_list=None, columns=None, release_list=None):
         """
         Returns a dataframe from a given list of lists, given 7 column data. 
         The last three columns are converted to datetime format.
@@ -136,7 +137,8 @@ class GetWikiGameTable:
         
         columns: List of str, optional
             This will be used to create the column headers of the dataframe.
-            Default ['Titles','Genres','Developers','Publishers','ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
+            Default ['Titles','Genres','Developers','Publishers',
+            'ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
 
         release_lit: List of str, optional
             The release date columns 
@@ -154,31 +156,34 @@ class GetWikiGameTable:
         Notes
         -----
         This function is specifically used to convert a specific WikiTable scraped data into a dataframe.
-        """    
-        
+        """
+
         if not full_list:
             full_list = self.assembled_list
         if not columns:
-            columns=['Titles','Genres','Developers','Publishers','ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
+            columns = ['Titles', 'Genres', 'Developers', 'Publishers', 'ReleaseDate_JP', 'ReleaseDate_EU',
+                       'ReleaseDate_NA']
         if not release_list:
-            release_list = ['ReleaseDate_JP','ReleaseDate_EU','ReleaseDate_NA']
-        
+            release_list = ['ReleaseDate_JP', 'ReleaseDate_EU', 'ReleaseDate_NA']
+
         try:
-            ps4_game_list = pd.DataFrame(full_list, columns = columns)
+            ps4_game_list = pd.DataFrame(full_list, columns=columns)
         except:
             raise ValueError('ERROR: issues with converting scraped wiki table data into DataFrame.')
-    
+
         for col in release_list:
             try:
-                ps4_game_list[col]=pd.to_datetime(ps4_game_list[col],infer_datetime_format=True,errors='coerce')
+                ps4_game_list[col] = pd.to_datetime(ps4_game_list[col], infer_datetime_format=True, errors='coerce')
             except:
                 print('WARNING: Could not convert scraped release date columns into datetime format.')
-    
-        punc_dict={ord('\''):None, ord(':'):None, ord('#'):None, ord('/'):' ', 
-               ord('&'):None, ord(';'):' ', ord('!'):None, ord(','):None, ord('?'):None, ord('.'):None}        
-        
-        ps4_game_list['TitlesHTML'] = ps4_game_list['Titles'].str.replace('\.0',' 0').str.replace('\.1',' 1').str.replace('\.5',' 5').str.replace(' -',' ').str.replace('//',' ').str.translate(punc_dict).str.replace('  ',' ').str.strip().str.lower().str.replace(' ','+')
-        
+
+        punc_dict = {ord('\''): None, ord(':'): None, ord('#'): None, ord('/'): ' ',
+                     ord('&'): None, ord(';'): ' ', ord('!'): None, ord(','): None, ord('?'): None, ord('.'): None}
+
+        ps4_game_list['TitlesHTML'] = ps4_game_list['Titles'].str.replace('\.0', ' 0').str.replace('\.1',
+                                                                                                   ' 1').str.replace(
+            '\.5', ' 5').str.replace(' -', ' ').str.replace('//', ' ').\
+            str.translate(punc_dict).str.replace('  ',' ').str.strip().str.lower().str.replace(' ', '+')
+
         self.game_df = ps4_game_list
         return self
-        
