@@ -14,13 +14,13 @@ from investigame import create_datadir_link
 from autoclassifier import AutoClassifier
 
 # Get a list of all PS4 games from Wiki
-WikiTable = GetWikiGameTable()
-WikiTable.get_wiki_table_list(WikiTable.html_add_0_m, WikiTable.xpath_0_m). \
-    get_wiki_table_list(WikiTable.html_add_m_z, WikiTable.xpath_m_z).get_wiki_table_df()
-write_tocsv(WikiTable.game_df, fname='ps4_wiki_list')
+wiki_table = GetWikiGameTable()
+wiki_table.get_wiki_table_list(wiki_table.html_add_0_m, wiki_table.xpath_0_m). \
+    get_wiki_table_list(wiki_table.html_add_m_z, wiki_table.xpath_m_z).get_wiki_table_df()
+write_tocsv(wiki_table.game_df, fname='ps4_wiki_list')
 
 # Get the pricing histories, reviews, and game cover image details for each game in the game table
-game_dets = PricingAndRevs(WikiTable.game_df)
+game_dets = PricingAndRevs(wiki_table.game_df)
 game_dets.get_all_price_histsandrev().write_dict()
 game_dets.get_prepdf_withreg(days=None, publisher_medval=18, publisher_lowval=3, dev_medval=4,
                              dev_lowval=1).get_successcol(threshold=-0.0001, verbose=True)
