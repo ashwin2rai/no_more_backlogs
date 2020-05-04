@@ -4,7 +4,7 @@
 
 Investors, resellers, and gaming enthusiasts are always interested in knowing if a new video game will be commercially sucessful. This information can be used in a variety of ways but most importantly as a signal for investment decisions since the gaming market is very volatile.
 
-InvestiGame uses Machine Learning tools and the `AutoClassifier` package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day through `Cron`.
+InvestiGame uses Machine Learning tools and the `AutoClassifier` package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day through `Cron`. This backend is then deployed into production as a WebApp using `Flask`, `GUnicorn`, and Amazon Web Services as well as an Android APK app developed using `Kivy` and `Buildozer`. The web app can be accessed at [**http://www.processwith.me**](http://www.processwith.me) and the Android app can be compiled using `Buildozer` from the source files in the KivyApp folder.
 
 This project was developed as part of the [**Insight Data Science**](https://www.insightdatascience.com/) program at Toronto, Jan 2020 session. The end-to-end pipeline was developed in 4 weeks with the timeline being:
 - 1st Week: brainstorming and feedback
@@ -43,6 +43,13 @@ AutoClassifier is a stand alone package, developed by the author, that can be us
   - **FlaskApp**: Folder containing source code for Web App executed using `Flask`
     - **templates**: Folder containing HTML templates used by the Web App to render pages
     - *server.py*: Python source code for Web App
+  - **KivyApp**: Folder containing source code for compiling Android App using `Buildozer` and `Kivy`
+    - **font**: Folder containing fonts for Android App
+    - **image**: Folder containing app image assets
+    - **kv**: Folder containing user interface design instructions for `Kivy` screens
+    - *main.kv*: KV source file for the primarry app user interface
+    - *main.py*: Python source code for execution using `Kivy`
+    - *buildozer.spec*: Specification file for compiling `Kivy` app into Android app using `Buildozer`
   - *requirements.txt*: Details dependencies for the packages
   - *setup.py*: Setup file for use with `pip`
   - *script.py*: Simple but complete execution of the `InvestiGame` package
@@ -51,9 +58,11 @@ AutoClassifier is a stand alone package, developed by the author, that can be us
 - *.gitignore*: Files to ignore in Git
 - *README.md*: This readme file
     
+### Android App
 
+The InvestiGame backend is also deployed as an Android App using `Kivy` and `Buildozer`. The InvestiGame package is used to generate a database of games and predictions which is uploaded into a `Google Firebase` database. The JSON data is pulled using the `Firebase` REST API by the Android app to display predictions of commercial performance for new, upcoming, and old games.  
 
-
+![Screenshot of Android App Home Screen](/images/kivy.jpg)
 
 
 
