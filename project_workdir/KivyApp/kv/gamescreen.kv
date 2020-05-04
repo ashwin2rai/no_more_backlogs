@@ -1,0 +1,71 @@
+<GameScreen>:
+    FloatLayout:
+        canvas:
+            Rectangle:
+                size: (max(self.size)*1.5,max(self.size))
+                pos: (self.pos[0] - min(self.size)*.4, self.pos[1])
+                source: "image/im.jpg"
+        GridLayout:
+            rows:1
+            pos_hint: {"top": .95, "right": 1}
+            size_hint: 1, .2
+            Image:
+                source: "image/investigame.png"
+        Label:
+            font_name: 'font/Montserrat.ttf'
+            font_size: "14dp"
+            pos_hint: {"top": .7, "center_x": .5}
+            size_hint: .9, .05 #width and height
+            text:
+                "Select a game from the bar below:"
+        Spinner:
+            text: 'Game'
+            background_normal: ''
+            background_color: 20/255, 50/255, 90/255, .95
+            values: app.data_req_titles
+            is_open: False
+            pos_hint: {"top": .65, "center_x": .5}
+            size_hint: .8, .1 #width and height
+            on_text:
+                app.save_spin_val(self.text)
+                app.change_screen('result_screen')
+        GridLayout:
+            rows:2
+            pos_hint: {"top": .25, "center_x": .5}
+            size_hint: .8, .2
+            Button:
+                background_normal: ''
+                background_color: 30/255, 50/255, 100/255, .9
+                text: "LinkedIn"
+                on_release:
+                    app.open_webpage('https://www.linkedin.com/in/ashwin2rai/')
+            Button:
+                background_normal: ''
+                background_color: 10/255, 50/255, 80/255, .9
+                text: "Github"
+                on_release:
+                    app.open_webpage('https://github.com/ashwin2rai/')
+            Button:
+                background_normal: ''
+                background_color: 30/255, 50/255, 100/255, .9
+                text: "Scholar"
+                on_release:
+                    app.open_webpage('https://scholar.google.com/citations?user=eqS0zH8AAAAJ&hl=en&oi=ao')
+            Button:
+                background_normal: ''
+                background_color: 10/255, 50/255, 80/255, .9
+                text: "Info"
+                on_release:
+                    app.change_screen('info_screen')
+            Button:
+                background_normal: ''
+                background_color: 30/255, 50/255, 100/255, .9
+                text: "Home"
+                on_release:
+                    app.change_screen('home_screen')
+            Button:
+                background_normal: ''
+                background_color: 10/255, 50/255, 80/255, .9
+                text: "Website"
+                on_release:
+                    app.open_webpage('http://www.processwith.me/')

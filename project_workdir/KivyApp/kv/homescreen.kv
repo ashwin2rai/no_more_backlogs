@@ -1,0 +1,23 @@
+<HomeScreen>:
+    FloatLayout:
+        canvas:
+            Rectangle:
+                size: (max(self.size)*1.5,max(self.size))
+                pos: (self.pos[0] - min(self.size)*.25, self.pos[1])
+                source: "image/im.jpg"
+        on_touch_down:
+            app.change_screen('game_screen',step=True)
+        GridLayout:
+            rows:1
+            spacing: 10,10
+            pos_hint: {"top": .9, "right": 1}
+            size_hint: 1, .5
+            Image:
+                source: "image/logo.png"
+        GridLayout:
+            rows:1
+            spacing: 10,10
+            pos_hint: {"top": .3, "center_x":.5 }
+            size_hint: .5, .1
+            Image:
+                source: "image/touch.png"

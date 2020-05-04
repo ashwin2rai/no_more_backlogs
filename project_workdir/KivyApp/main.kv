@@ -1,0 +1,25 @@
+#:include kv/homescreen.kv
+#:include kv/gamescreen.kv
+#:include kv/nointscreen.kv
+#:include kv/infoscreen.kv
+#:include kv/resultscreen.kv
+
+GridLayout:
+	cols: 1
+	ScreenManager:
+	    id: screen_manager
+	    HomeScreen:
+	        name: "home_screen"
+	        id: home_screen
+	    GameScreen:
+	        name: "game_screen"
+	        id: game_screen
+	    NoIntScreen:
+	        name: "noint_screen"
+	        id: noint_screen
+	    InfoScreen:
+	        name: "info_screen"
+	        id: info_screen
+	    ResultScreen:
+	        name: "result_screen"
+	        id: result_screen

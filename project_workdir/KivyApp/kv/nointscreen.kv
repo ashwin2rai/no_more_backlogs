@@ -1,0 +1,19 @@
+<NoIntScreen>:
+    FloatLayout:
+        canvas:
+            Rectangle:
+                size: (max(self.size)*1.5,max(self.size))
+                pos: (self.pos[0] - min(self.size)*.25, self.pos[1])
+                source: "image/im.jpg"
+        GridLayout:
+            rows:1
+            pos_hint: {"top": .95, "right": 1}
+            size_hint: 1, .2
+            Image:
+                source: "image/investigame.png"
+        GridLayout:
+            rows:1
+            pos_hint: {"top": .75, "center_x":.5}
+            size_hint: 1, .5
+            Image:
+                source: "image/error.png"

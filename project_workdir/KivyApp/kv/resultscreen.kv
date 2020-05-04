@@ -1,0 +1,62 @@
+<ResultScreen>:
+    FloatLayout:
+        canvas:
+            Rectangle:
+                size: (max(self.size)*1.5,max(self.size))
+                pos: (self.pos[0] - min(self.size)*.4, self.pos[1])
+                source: "image/im.jpg"
+        GridLayout:
+            rows:1
+            pos_hint: {"top": 1, "right": 1}
+            size_hint: 1, .1
+            Image:
+                source: "image/investigame.png"
+        GridLayout:
+            id: game_card_layout
+            canvas:
+                Color:
+                    rgba: 30/255, 50/255, 100/255, .9
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            rows:1
+            pos_hint: {"top": .9, "center_x": .5}
+            size_hint: .8, .3
+#            AsyncImage:
+#                id: game_card
+#                source:
+#                    app.game_card_url
+        GridLayout:
+            id: game_preds
+            cols:1
+            pos_hint: {"top": .6, "center_x": .5}
+            size_hint: .8, .25
+            Label:
+                id: game_det_text
+                font_name: 'font/Montserrat.ttf'
+                font_size: "14dp"
+                text:
+                    "Game: #killallzombies\nPublisher: Beatshapers\nDeveloper: Beatshapers\nAggregate Review: 62.0"
+            Label:
+                id: game_pred_text
+                font_name: 'font/Montserrat.ttf'
+                font_size: "14.5dp"
+                text:
+                    "Prediction: This game will be a Failure\nConfidence: 59.05%"
+        GridLayout:
+            cols:1
+            pos_hint: {"top": .25, "center_x": .5}
+            spacing: 10,10
+            size_hint: .8, .2
+            Button:
+                background_normal: ''
+                background_color: 10/255, 50/255, 80/255, .9
+                text: "Info"
+                on_release:
+                    app.change_screen('info_screen')
+            Button:
+                background_normal: ''
+                background_color: 10/255, 50/255, 80/255, .9
+                text: "Select Another Game"
+                on_release:
+                    app.change_screen('game_screen')
