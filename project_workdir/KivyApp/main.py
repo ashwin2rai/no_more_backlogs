@@ -35,7 +35,7 @@ class MainApp(App):
     os.environ['SSL_CERT_FILE'] = certifi.where()
 
     spin_val = 'Default'
-    firebase_url = 'https://investigame-fd5a3.firebaseio.com/'
+    firebase_url = 'https://APPID.firebaseio.com/'
     game_card_url = 'http://store.playstation.com/store/api/chihiro/00_09_000/container/US/en/19/UP4101-CUSA00856_00-SOCIALSHAREARENA/image?w=320&h=320&bg_color=000000&opacity=100&_version=00_09_000'
 
     try:
