@@ -4,7 +4,7 @@
 
 Investors, resellers, and gaming enthusiasts are always interested in knowing if a new video game will be commercially sucessful. This information can be used in a variety of ways but most importantly as a signal for investment decisions since the gaming market is very volatile.
 
-InvestiGame uses Machine Learning tools and the `AutoClassifier` package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day through `Cron`. This backend is then deployed into production as a WebApp using `Flask`, `GUnicorn`, and Amazon Web Services as well as an Android APK app developed using `Kivy` and `Buildozer`. The web app can be accessed at [**http://www.processwith.me**](http://www.processwith.me) and the Android app can be compiled using `Buildozer` from the source files in the KivyApp folder.
+InvestiGame uses Machine Learning tools and the `AutoClassifier` package to calculate and predict how video games will perform on the market using social media text analytics, publisher/developer info, and professional reviews for the game. New games that are about to be released are searched for, the model retrained, and added to the database each day using a scheduled `Cron` job. This backend is then deployed into production as a WebApp using `Flask`, `GUnicorn`, and Amazon Web Services as well as an Android and iOS apps. The web app can be accessed at [**http://www.processwith.me**](http://www.processwith.me) and a pythonic Android app can be compiled using `Buildozer` from the source files in the KivyApp folder. NativeScript iOS and Android app, written using `JavaScript`, `CSS`, and `XML` can be found [here](https://github.com/ashwin2rai/investigame_nativescript). 
 
 This project was developed as part of the [**Insight Data Science**](https://www.insightdatascience.com/) program at Toronto, Jan 2020 session. The end-to-end pipeline was developed in 4 weeks with the timeline being:
 - 1st Week: brainstorming and feedback
@@ -58,9 +58,12 @@ AutoClassifier is a stand alone package, developed by the author, that can be us
 - *.gitignore*: Files to ignore in Git
 - *README.md*: This readme file
     
-### Android App
+### Mobile App
 
-The InvestiGame backend is also deployed as an Android App using `Kivy` and `Buildozer`. The InvestiGame package is used to generate a database of games and predictions which is uploaded into a `Google Firebase` database. The JSON data is pulled using the `Firebase` REST API by the Android app to display predictions of commercial performance for new, upcoming, and old games.  
+The InvestiGame backend is also deployed as an Android and iOS mobile app. Two different frameworks were used to develop this app: 1) using pure `Python`; 2) using the `NativeScript` framework and developed in `JavaScript`, `CSS`, and `XML`. The pythonic Android app is built using `Kivy` and `Buildozer`. However, this app does not generate efficient performance. The NativeScript app leads to native performance on both Android and iOS. Both apps use the InvestiGame package as the backend, which is used to generate a database of games and predictions and is uploaded to a `Google Firebase` database. Both apps then pull the JSON data using the `Firebase` REST API to display predictions of commercial performance for new, upcoming, and old games.  
+
+- The pythonic Android app, built using `Kivy` and `Buildozer` can be found in this repo, under the folder **KivyApp**
+- The `NativeScript` iOS and Android app can be found in this repo: https://github.com/ashwin2rai/investigame_nativescript
 
 ![Screenshot of Android App Home Screen](/images/kivy.jpg)
 
